@@ -1,67 +1,59 @@
 # Smart Campus Assistant
 
-A modern, full-stack web application designed to help students and faculty access essential campus utilities in a clean, fast, mobile-first interface.
+A hosted web application providing essential campus utilities for students and faculty. Access the live application at your institution's domain.
 
-**Built with**: Next.js 14 • React • TypeScript • TailwindCSS • Supabase • NextAuth.js
+**Tech Stack**: Next.js 14 | React | TypeScript | TailwindCSS | Supabase | NextAuth.js | Vercel
 
 ---
 
-## Table of Contents
+## For Users
 
-- [Project Overview](#project-overview)
-- [Features](#features)
+Access the application through your browser using your institutional Google account. No installation required.
+
+### Features
+
+**Student Access**
+- View your course timetable
+- Access and download shared course notes
+- Report or search lost and found items
+- Browse upcoming campus events
+- Chat with AI study assistant
+
+**Admin Access** (faculty and staff)
+- Manage course timetables
+- Register course notes from Google Drive
+- Create and publish campus events
+- Manage lost and found items
+
+---
+
+## For Developers
+
+This section is for developers contributing to the codebase.
+
+### Quick Start (Development)
+
+```bash
+git clone <repository>
+cd smart-campus-assistant
+npm install
+cp .env.example .env.local
+# Fill in .env.local with credentials
+npm run dev
+```
+
+Visit http://localhost:3000
+
+### Table of Contents
+
 - [Tech Stack](#tech-stack)
-- [Quick Start](#quick-start)
-- [Environment Setup](#environment-setup)
-- [Database Setup](#database-setup)
-- [Development](#development)
-- [Project Structure](#project-structure)
-- [API Documentation](#api-documentation)
+- [Environment Configuration](#environment-configuration)
+- [Database Schema](#database-schema)
+- [Development Workflow](#development-workflow)
+- [API Reference](#api-reference)
 - [Deployment](#deployment)
 - [Contributing](#contributing)
 
----
-
-## Project Overview
-
-This is an MVP (Minimum Viable Product) of the Smart Campus Assistant, built following strict architectural principles defined in [Master_Prompt.md](docs/Master_Prompt.md) and [AI Instructions](docs/copilot-instructions.md).
-
-The app is NOT an academic assignment—it's a professional learning platform for the team to master:
-- Modern full-stack web development
-- Cloud deployment & serverless architecture
-- Database design & authentication
-- API development & integration
-- Team collaboration & code quality
-
----
-
-## Features
-
-### MVP (Current Phase)
-
-**Student Features:**
-- ✅ Google OAuth authentication
-- ✅ Dashboard with quick links
-- ✅ Course timetable viewer
-- ✅ Shared course notes browser & download
-- ✅ Lost & Found portal
-- ✅ Events calendar (placeholder)
-- 🔜 AI chatbot for study help
-- 🔜 Classroom finder
-
-**Admin Features:**
-- ✅ Admin-only routes with role-based access
-- 🔜 Add/manage timetable entries
-- 🔜 Register notes from Google Drive
-- 🔜 Create/publish events
-- 🔜 Manage lost & found items
-
-### Future Phases
-- PWA & offline support
-- Push notifications
-- Real-time collaboration (Supabase Realtime)
-- Analytics dashboard
-- Multi-campus support
 
 ---
 
@@ -69,130 +61,74 @@ The app is NOT an academic assignment—it's a professional learning platform fo
 
 | Layer | Technology |
 |-------|-----------|
-| **Frontend** | Next.js 14 (App Router) + React + TypeScript |
-| **Styling** | TailwindCSS + ShadCN UI |
-| **Backend** | Vercel Serverless Functions (Next.js API Routes) |
-| **Database** | Supabase Postgres with Row Level Security |
-| **Authentication** | NextAuth.js + Google OAuth |
-| **File Storage** | Google Drive (PDF notes) |
-| **AI/LLM** | OpenAI / Groq / Mistral |
-| **Deployment** | Vercel |
+| Frontend | Next.js 14 (App Router) + React + TypeScript |
+| Styling | TailwindCSS + ShadCN UI |
+| Backend | Vercel Serverless Functions |
+| Database | Supabase Postgres + RLS |
+| Auth | NextAuth.js + Google OAuth |
+| Storage | Google Drive |
+| AI | OpenAI / Groq / Mistral |
+| Deploy | Vercel
 
----
 
-## Quick Start
 
-### Prerequisites
-
-- Node.js 18+ and npm/yarn
-- Supabase account
-- Google Cloud project with OAuth credentials
+### Prerequisites for Development
+- Node.js 18+
+- npm or yarn
+- Supabase account (free tier supported)
+- Google Cloud project with OAuth configured
 - LLM API key (OpenAI, Groq, or Mistral)
 
-### Installation
+### Supabase
+Get from Supabase dashboard > Settings > API:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_key
+```
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-org/smart-campus-assistant.git
-   cd smart-campus-assistant
-   ```
+### Google OAuth
+Create OAuth 2.0 credentials in Google Cloud Console:
+```env
+GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your_secret
+```
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+Authorized redirect URIs:
+- Development: http://localhost:3000/api/auth/callback/google
+- Production: https://yourdomain.com/api/auth/callback/google
 
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env.local
-   # Edit .env.local with your credentials
-   ```
-
-4. **Set up the database** (see Database Setup below)
-
-5. **Run the development server**
-   ```bash
-   npm run dev
-   ```
-
-6. **Open in browser**
-   ```
-   http://localhost:3000
-   ```
-
----
-
-## Environment Setup
-
-### 1. Supabase
-
-1. Create a project at [supabase.com](https://supabase.com)
-2. Copy `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` from project settings
-3. Add to `.env.local`:
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
-   SUPABASE_SERVICE_ROLE_KEY=your_key_here
-   ```
-
-### 2. Google OAuth
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Create a new project
-3. Enable Google+ API
-4. Create OAuth 2.0 credentials (Authorized JavaScript origins: `http://localhost:3000` for dev)
-5. Get Client ID and Client Secret
-6. Add to `.env.local`:
-   ```env
-   GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
-   GOOGLE_CLIENT_SECRET=your_secret_here
-   ```
-
-### 3. NextAuth Secret
-
-Generate a random 32+ character string:
-
+### NextAuth
+Generate a secure random string:
 ```bash
 openssl rand -base64 32
 ```
 
-Add to `.env.local`:
 ```env
-NEXTAUTH_SECRET=your_generated_secret
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=<generated_secret>
+NEXTAUTH_URL=http://localhost:3000  # Change for production
 ```
 
-### 4. LLM Provider
-
-Choose one: OpenAI, Groq, or Mistral
-
-**OpenAI:**
+### LLM Provider (Choose one)
 ```env
 NEXT_PUBLIC_LLM_PROVIDER=openai
-OPENAI_API_KEY=sk_your_key_here
-```
+OPENAI_API_KEY=sk_your_key
 
-**Groq (faster & free tier available):**
-```env
+# OR
 NEXT_PUBLIC_LLM_PROVIDER=groq
-GROQ_API_KEY=your_key_here
-```
+GROQ_API_KEY=your_key
 
-**Mistral:**
-```env
+# OR
 NEXT_PUBLIC_LLM_PROVIDER=mistral
-MISTRAL_API_KEY=your_key_here
+MISTRAL_API_KEY=your_key
 ```
 
 ---
 
-## Database Setup
+## Database Schema
 
-### Create Supabase Tables
-
-Run these SQL commands in Supabase SQL Editor:
+Run the SQL in Supabase SQL Editor (see `docs/schema.sql` for full migration):
 
 ```sql
--- Users table
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT UNIQUE NOT NULL,
@@ -201,18 +137,16 @@ CREATE TABLE users (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
--- Notes table
 CREATE TABLE notes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   course TEXT NOT NULL,
   file_id TEXT NOT NULL,
   drive_url TEXT NOT NULL,
-  created_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_by UUID NOT NULL REFERENCES users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
--- Timetable table
 CREATE TABLE timetable (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   course TEXT NOT NULL,
@@ -223,17 +157,15 @@ CREATE TABLE timetable (
   faculty TEXT NOT NULL
 );
 
--- Events table
 CREATE TABLE events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   starts_at TIMESTAMP WITH TIME ZONE NOT NULL,
   ends_at TIMESTAMP WITH TIME ZONE NOT NULL,
-  created_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE
+  created_by UUID NOT NULL REFERENCES users(id)
 );
 
--- Lost & Found table
 CREATE TABLE lostfound (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   item_name TEXT NOT NULL,
@@ -243,183 +175,155 @@ CREATE TABLE lostfound (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
--- Enable RLS (Row Level Security)
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE timetable ENABLE ROW LEVEL SECURITY;
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lostfound ENABLE ROW LEVEL SECURITY;
-
--- Create basic RLS policies
-CREATE POLICY "Users can read all users" ON users FOR SELECT USING (true);
-CREATE POLICY "Users can read notes" ON notes FOR SELECT USING (true);
-CREATE POLICY "Users can read timetable" ON timetable FOR SELECT USING (true);
-CREATE POLICY "Users can read events" ON events FOR SELECT USING (true);
-CREATE POLICY "Users can read lostfound" ON lostfound FOR SELECT USING (true);
 ```
 
----
+Then set up RLS policies (see `docs/schema.sql` for complete setup).
+
+After first login, set your role to admin in Supabase:
+1. Navigate to `tables > users`
+2. Find your email
+3. Change `role` from `student` to `admin`
+4. Save
 
 ## Development
 
 ### Commands
 
 ```bash
-# Development server
-npm run dev
-
-# Type checking
-npm run type-check
-
-# Linting
-npm run lint
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
+npm run dev          # Start development server (http://localhost:3000)
+npm run type-check   # Run TypeScript type checking
+npm run lint         # Run ESLint
+npm run build        # Build for production
+npm start            # Start production server
 ```
 
-### Code Style
+### Code Standards
 
-This project uses:
-- **TypeScript** strict mode (no `any` without explanation)
-- **ESLint** for code quality
-- **Prettier** for formatting (auto on save in VS Code)
+- **TypeScript strict mode** - all files must pass type checking
+- **ESLint** - code must pass linting
+- **Prettier** - auto-formats on save (configure in VS Code)
+- **Mobile-first** - responsive design with TailwindCSS breakpoints
 
-All code must pass:
+Verify before committing:
 ```bash
-npm run type-check
-npm run lint
+npm run type-check && npm run lint
 ```
 
 ### Development Workflow
 
-1. Create a feature branch: `git checkout -b feature/my-feature`
-2. Make changes (code will auto-format on save)
-3. Test locally: `npm run dev`
-4. Type check: `npm run type-check`
-5. Commit with clear message: `git commit -m "feat: add new feature"`
-6. Push and create Pull Request
-
----
-
-## Project Structure
-
 ```
-smart-campus-assistant/
-├── app/
-│   ├── layout.tsx              # Root layout with navigation
-│   ├── page.tsx                # Home (redirects to dashboard/signin)
-│   ├── auth/signin/page.tsx    # Sign in page
-│   ├── (dashboard)/
-│   │   └── dashboard/page.tsx  # Main dashboard
-│   ├── notes/                  # Notes pages
-│   ├── timetable/page.tsx      # Timetable viewer
-│   ├── events/page.tsx         # Events calendar
-│   ├── lostfound/page.tsx      # Lost & Found portal
-│   ├── classfinder/page.tsx    # Classroom finder
-│   ├── admin/page.tsx          # Admin dashboard
-│   └── api/
-│       ├── auth/[...nextauth]/ # NextAuth routes
-│       ├── notes/route.ts      # Notes API
-│       ├── timetable/route.ts  # Timetable API
-│       ├── events/route.ts     # Events API
-│       ├── lostfound/route.ts  # Lost & Found API
-│       └── chat/route.ts       # AI Chatbot API
-│
-├── components/
-│   ├── ui/                     # ShadCN UI components
-│   ├── navbar.tsx              # Top navigation
-│   ├── sidebar.tsx             # Desktop sidebar
-│   ├── chatbot.tsx             # Chat UI (placeholder)
-│   └── pdf-viewer.tsx          # PDF preview (placeholder)
-│
-├── lib/
-│   ├── types.ts                # Type definitions (single source of truth)
-│   ├── supabase.ts             # Supabase client & queries
-│   ├── auth.ts                 # Authentication helpers
-│   ├── drive.ts                # Google Drive utilities
-│   ├── openai.ts               # LLM API wrapper
-│   └── utils.ts                # Utility functions
-│
-├── styles/
-│   └── globals.css             # Global TailwindCSS styles
-│
-├── docs/
-│   ├── Master_Prompt.md        # Technical specification
-│   └── copilot-instructions.md # AI agent guidelines
-│
-├── .env.example                # Environment variables template
-├── next.config.js              # Next.js configuration
-├── tailwind.config.ts          # TailwindCSS configuration
-├── tsconfig.json               # TypeScript configuration
-└── package.json
+app/                          Next.js App Router
+├── layout.tsx               Root layout
+├── page.tsx                 Home redirect
+├── (dashboard)/dashboard/   Main dashboard
+├── notes/                   Notes pages
+├── timetable/               Timetable viewer
+├── events/, lostfound/, etc.
+└── api/                     API routes
+    ├── auth/[...nextauth]/  NextAuth handler
+    ├── notes/               Notes CRUD
+    ├── timetable/           Timetable CRUD
+    ├── events/              Events CRUD
+    ├── lostfound/           Lost & Found CRUD
+    └── chat/                LLM chat
+
+components/
+├── ui/                      ShadCN UI components
+├── navbar.tsx               Navigation
+└── sidebar.tsx              Desktop sidebar
+
+lib/
+├── types.ts                 Type definitions (source of truth)
+├── supabase.ts              DB queries
+├── auth.ts                  Auth helpers
+├── drive.ts                 Google Drive utilities
+├── openai.ts                LLM wrapper
+└── utils.ts                 Utilities
 ```
 
----
+#### Adding Features
 
-## API Documentation
+1. **Define types** in `lib/types.ts`
+2. **Create page** in `app/[feature]/page.tsx`
+3. **Add API route** in `app/api/[feature]/route.ts`
+4. **Add DB queries** in `lib/supabase.ts` if needed
+5. **Test locally**, then commit
+
+#### Git Workflow
+
+```bash
+git checkout -b feature/my-feature
+# Make changes
+npm run type-check && npm run lint
+git add .
+git commit -m "feat: description of change"
+git push origin feature/my-feature
+# Create PR
+```
+
+## API Reference
 
 ### Authentication
+- POST `/api/auth/signin` - Google OAuth challenge
+- POST `/api/auth/callback` - OAuth redirect handler
+- GET `/api/auth/session` - Current session
+- POST `/api/auth/signout` - Sign out
 
-All endpoints (except `/api/auth/*`) require a valid session.
+### Notes
+- GET `/api/notes` - List all notes (authenticated)
+- POST `/api/notes` - Create note (admin only)
+- GET `/api/notes/:id` - Get specific note
+- GET `/api/notes/:id/download` - Download PDF
 
-### Endpoints
+### Timetable
+- GET `/api/timetable?course=CS101` - List entries (optional course filter)
+- POST `/api/timetable` - Create entry (admin only)
 
-#### Notes
-- `GET /api/notes` — List all notes
-- `GET /api/notes/:id` — Get specific note
-- `GET /api/notes/:id/download` — Download note PDF
-- `POST /api/notes` — Create note (admin only)
+### Events
+- GET `/api/events?filter=upcoming` - List events
+- POST `/api/events` - Create event (admin only)
 
-#### Timetable
-- `GET /api/timetable?course=CS101` — Get timetable, optionally filtered by course
-- `POST /api/timetable` — Create entry (admin only)
+### Lost & Found
+- GET `/api/lostfound` - List items
+- POST `/api/lostfound` - Report item (any user)
 
-#### Events
-- `GET /api/events?filter=upcoming` — List events
-- `POST /api/events` — Create event (admin only)
+### Chat
+- POST `/api/chat` - Send message to LLM assistant
 
-#### Lost & Found
-- `GET /api/lostfound` — List items
-- `POST /api/lostfound` — Report lost/found item
-
-#### Chat
-- `POST /api/chat` — Send message to AI assistant
-
----
+All endpoints require authentication except `/api/auth/*`. Admin endpoints verify `session.user.role === 'admin'`.
 
 ## Deployment
 
-### Deploy to Vercel
+The application is deployed on Vercel with automatic CI/CD. Commits to the main branch automatically deploy to production.
 
-1. Push code to GitHub
-2. Connect repo to [Vercel](https://vercel.com)
-3. Add environment variables in Vercel dashboard
-4. Deploy!
+### Environment Variables
+All required environment variables must be set in Vercel project settings:
+- Supabase credentials
+- Google OAuth keys
+- LLM API key
+- NextAuth secret
 
-```bash
-# Or deploy from CLI
-vercel
-```
+### Deployment Process
 
-### Production Checklist
+1. Code changes pushed to GitHub
+2. Vercel automatically builds and tests
+3. On success, deploys to production
+4. Domain URL receives latest version
 
-- [ ] All environment variables set in Vercel
-- [ ] Database tables created & RLS enabled
-- [ ] Google OAuth credentials updated with production URL
-- [ ] `NEXTAUTH_URL` set to production domain
-- [ ] `NEXTAUTH_SECRET` is a strong random string
-- [ ] SSL certificate enabled
-- [ ] Database backups configured
+### Production Requirements
+
+- Database tables created with RLS enabled
+- Google OAuth redirect URIs configured for production domain
+- NEXTAUTH_URL set to production domain
+- All environment variables configured
+- Database backups enabled
 
 ---
-
-## Contributing
-
-This project follows [Master_Prompt.md](docs/Master_Prompt.md) and [AI Coding Instructions](docs/copilot-instructions.md) for consistency.
 
 ### Guidelines
 
@@ -430,41 +334,3 @@ This project follows [Master_Prompt.md](docs/Master_Prompt.md) and [AI Coding In
 - **Mobile-first design** — TailwindCSS responsive breakpoints
 - **Clear PR descriptions** — what changed, why, which spec section
 
-### Code Review Checklist
-
-- [ ] TypeScript strict mode passes
-- [ ] ESLint & Prettier pass
-- [ ] No hardcoded secrets
-- [ ] Tests/manual verification complete
-- [ ] PR description references spec section
-
----
-
-## Resources
-
-- [Next.js 14 Docs](https://nextjs.org/docs)
-- [Supabase Docs](https://supabase.com/docs)
-- [NextAuth.js Docs](https://next-auth.js.org)
-- [TailwindCSS Docs](https://tailwindcss.com/docs)
-- [ShadCN UI](https://ui.shadcn.com)
-
----
-
-## License
-
-MIT
-
----
-
-## Team
-
-- **Project Lead**: You
-- **UI/UX**: Devu Krishna
-- **Backend/Database**: Aleena Mary Joseph
-- **APIs/AI**: Sreeram S Nair
-
-Built with ❤️ using modern web technologies.
-
----
-
-**Last Updated**: December 17, 2025
