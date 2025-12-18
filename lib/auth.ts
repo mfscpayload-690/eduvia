@@ -1,4 +1,4 @@
-import { getServerSession as nextAuthGetServerSession } from "next-auth";
+import { getServerSession as nextAuthGetServerSession } from "next-auth/next";
 import type { Session } from "./types";
 
 /**

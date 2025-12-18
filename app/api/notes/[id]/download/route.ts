@@ -6,15 +6,16 @@ import { requireAuth } from "@/lib/auth";
  * Redirect to Google Drive download link
  */
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAuth();
+    const { id } = await params;
 
     // In a real implementation, you would fetch the note from Supabase
     // and get its drive_url, then redirect to it
-    // For now, we'll return a placeholder
+    console.log("Note ID for download:", id);
 
     return NextResponse.json(
       { error: "Note not found" },

@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Clock, MapPin, Calendar, Heart, MessageSquare } from "lucide-react";
+import { BookOpen, Clock, MapPin, Calendar, Heart } from "lucide-react";
 
 const quickLinks = [
   {

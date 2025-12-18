@@ -17,7 +17,7 @@ export const supabase = createClient(supabaseUrl, supabaseServiceKey);
 export async function getOrCreateUser(
   email: string,
   name: string,
-  googleId: string
+  _googleId: string
 ): Promise<User> {
   const { data: existing } = await supabase.from("users").select("*").eq("email", email).single();
 

@@ -7,13 +7,14 @@ import { requireAuth } from "@/lib/auth";
  * Fetch a specific note by ID
  */
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAuth();
+    const { id } = await params;
 
-    const note = await getNoteById(params.id);
+    const note = await getNoteById(id);
 
     if (!note) {
       return NextResponse.json(

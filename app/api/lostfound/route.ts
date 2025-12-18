@@ -1,13 +1,13 @@
 
 import { NextResponse } from "next/server";
-import { getLostFoundItems, createLostFoundItem, updateLostFoundItem } from "@/lib/supabase";
-import { requireAuth, requireAdmin } from "@/lib/auth";
+import { getLostFoundItems, createLostFoundItem } from "@/lib/supabase";
+import { requireAuth } from "@/lib/auth";
 
 /**
  * GET /api/lostfound
  * Fetch all lost & found items
  */
-export async function GET(req: Request) {
+export async function GET() {
   try {
     await requireAuth();
 

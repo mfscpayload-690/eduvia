@@ -9,7 +9,6 @@ import {
   MapPin,
   Calendar,
   Heart,
-  MessageSquare,
   Settings,
 } from "lucide-react";
 

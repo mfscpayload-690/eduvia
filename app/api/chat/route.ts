@@ -9,7 +9,7 @@ import type { ChatMessage } from "@/lib/types";
  */
 export async function POST(req: Request) {
   try {
-    const session = await requireAuth();
+    await requireAuth();
 
     const body = await req.json();
     const { message, context } = body;
