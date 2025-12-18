@@ -29,7 +29,7 @@ const BRANCHES: { value: BranchOfStudy; label: string; program: ProgramType }[] 
 ];
 
 export default function CreateProfile() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -80,6 +80,10 @@ export default function CreateProfile() {
         throw new Error(data.error || "Failed to create profile");
       }
 
+      // Update session to reflect profile completion
+      await update();
+      
+      // Redirect to dashboard
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
