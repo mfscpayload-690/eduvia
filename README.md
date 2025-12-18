@@ -1,5 +1,11 @@
 # Eduvia
 
+**Status: Under Development**
+
+This project is currently in active development. Features and functionality may change frequently.
+
+---
+
 Your all-in-one campus companion. Effortlessly manage your academic life with integrated tools for schedules, notes, events, and more.
 
 ---
@@ -45,12 +51,6 @@ Eduvia is a comprehensive campus management platform designed to streamline stud
 - Download important course materials from the Notes section
 - Check the Events page for upcoming activities
 - Use Classroom Finder to navigate campus
-
----
-
-## Support
-
-For questions or issues, contact your institution's IT support team or visit our help center.
 
 ---
 
