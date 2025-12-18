@@ -84,3 +84,13 @@ Detailed developer documentation is available in the `/docs` directory, includin
 - **Mobile-first design** — TailwindCSS responsive breakpoints
 - **Clear PR descriptions** — what changed, why, which spec section
 
+---
+
+## Web Analytics
+
+- Analytics is enabled via `@vercel/analytics` and the `<Analytics />` component mounted in the root layout.
+- No configuration is required; page views are tracked automatically in Vercel.
+- To view metrics, open the project in Vercel → Analytics.
+
+Local development works without errors, but events are collected from deployed environments.
+
