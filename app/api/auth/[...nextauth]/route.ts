@@ -10,7 +10,7 @@ if (!googleClientId || !googleClientSecret || !nextAuthSecret) {
   throw new Error("Missing required authentication environment variables");
 }
 
-export const authOptions = {
+const authOptions = {
   providers: [
     GoogleProvider({
       clientId: googleClientId,
