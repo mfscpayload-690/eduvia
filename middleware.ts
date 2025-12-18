@@ -1,8 +1,27 @@
 import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export default withAuth(
-  function middleware(_req: NextRequest) {},
+  async function middleware(req: NextRequest) {
+    const token = (req as any).nextauth?.token;
+    const pathname = req.nextUrl.pathname;
+
+    // Skip profile check for profile creation and settings routes
+    if (pathname.startsWith("/profile") || pathname.startsWith("/settings")) {
+      return NextResponse.next();
+    }
+
+    // Check if user has completed their profile
+    if (token && !(token as any).profile_completed) {
+      // Redirect to profile creation if not completed
+      const url = req.nextUrl.clone();
+      url.pathname = "/profile/create";
+      return NextResponse.redirect(url);
+    }
+
+    return NextResponse.next();
+  },
   {
     pages: {
       signIn: "/auth/signin",
@@ -29,5 +48,7 @@ export const config = {
     "/events/:path*",
     "/classfinder/:path*",
     "/admin/:path*",
+    "/profile/:path*",
+    "/settings/:path*",
   ],
 };

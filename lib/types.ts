@@ -9,12 +9,37 @@
 
 export type UserRole = "student" | "admin";
 
+export type BranchOfStudy = 
+  | "Computer Science and Engineering(CS)"
+  | "Computer Science and Engineering(CYBERSECURITY)"
+  | "Electronics and Communication Engineering (EC)"
+  | "Electrical and Electronics Engineering (EE)"
+  | "M.Tech in Computer Science and Engineering(Cyber Forensics and Information Security)";
+
+export type ProgramType = "B.Tech" | "M.Tech";
+
 export interface User {
   id: string;
   email: string;
   name: string;
   role: UserRole;
+  college?: string;
+  mobile?: string;
+  semester?: number;
+  year_of_study?: number;
+  branch?: BranchOfStudy;
+  program_type?: ProgramType;
+  profile_completed: boolean;
   created_at: Date;
+}
+
+export interface UpdateProfileDTO {
+  college: string;
+  mobile: string;
+  semester: number;
+  year_of_study: number;
+  branch: BranchOfStudy;
+  program_type: ProgramType;
 }
 
 export interface Session {

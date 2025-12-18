@@ -68,7 +68,7 @@ export default function DashboardPage() {
       {/* Welcome Section */}
       <div>
         <h1 className="text-3xl font-bold">Welcome, {session.user?.name}!</h1>
-        <p className="text-neutral-400 mt-2">Get started with Smart Campus</p>
+        <p className="text-neutral-400 mt-2">Get started with Eduvia</p>
       </div>
 
       {/* Quick Links Grid */}

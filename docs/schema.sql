@@ -9,10 +9,18 @@ CREATE TABLE users (
   email TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'student' CHECK (role IN ('student', 'admin')),
+  college TEXT,
+  mobile TEXT,
+  semester INTEGER,
+  year_of_study INTEGER,
+  branch TEXT,
+  program_type TEXT CHECK (program_type IN ('B.Tech', 'M.Tech')),
+  profile_completed BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_profile_completed ON users(profile_completed);
 
 -- ============================================================================
 -- Notes Table (Google Drive PDFs)

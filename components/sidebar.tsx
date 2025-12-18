@@ -51,6 +51,11 @@ const navItems: NavItem[] = [
     icon: <Heart size={20} />,
   },
   {
+    href: "/settings",
+    label: "Settings",
+    icon: <Settings size={20} />,
+  },
+  {
     href: "/admin",
     label: "Admin",
     icon: <Settings size={20} />,
