@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,6 +32,7 @@ export default function Settings() {
   const { data: session, status, update } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -121,6 +122,33 @@ export default function Settings() {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      "Delete your account? This will remove your profile and related data. This action cannot be undone."
+    );
+    if (!confirmed) return;
+
+    setDeleteLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const response = await fetch("/api/profile", { method: "DELETE" });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete account");
+      }
+
+      // Immediately sign the user out and redirect
+      await signOut({ callbackUrl: "/auth/signin" });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -301,6 +329,31 @@ export default function Settings() {
                 </Button>
               </div>
             </form>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-neutral-900 border-neutral-800">
+          <CardHeader>
+            <CardTitle className="text-xl text-red-400">Delete Account</CardTitle>
+            <CardDescription className="text-neutral-400">
+              Permanently delete your account and related data. This cannot be undone.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3 text-sm text-neutral-300">
+              <p>No user data selling, ads usage, or hidden collection. You can delete your account anytime.</p>
+              <p className="text-neutral-400">This will remove your profile and linked data stored in Eduvia.</p>
+            </div>
+            <div className="mt-4">
+              <Button
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={deleteLoading}
+                className="w-full bg-red-600 hover:bg-red-700 text-white"
+              >
+                {deleteLoading ? "Deleting..." : "Delete My Account"}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

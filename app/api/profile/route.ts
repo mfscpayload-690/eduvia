@@ -76,3 +76,28 @@ export async function GET() {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+
+export async function DELETE() {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { error } = await supabase
+      .from("users")
+      .delete()
+      .eq("email", session.user.email);
+
+    if (error) {
+      console.error("Supabase delete error:", error);
+      return NextResponse.json({ error: "Failed to delete account" }, { status: 500 });
+    }
+
+    return NextResponse.json({ message: "Account deleted" });
+  } catch (error) {
+    console.error("Account delete error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
