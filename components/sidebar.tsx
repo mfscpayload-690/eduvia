@@ -52,7 +52,7 @@ const navItems: NavItem[] = [
   },
   {
     href: "/settings",
-    label: "Settings",
+    label: "Profile",
     icon: <Settings size={20} />,
   },
   {

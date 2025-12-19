@@ -10,6 +10,20 @@ export function Navbar() {
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const mobileNavItems = [
+    { href: "/dashboard", label: "Dashboard" },
+    { href: "/notes", label: "Course Notes" },
+    { href: "/timetable", label: "Timetable" },
+    { href: "/classfinder", label: "Classroom Finder" },
+    { href: "/events", label: "Events" },
+    { href: "/lostfound", label: "Lost & Found" },
+    { href: "/settings", label: "Profile" },
+  ];
+
+  if (session?.user?.role === "admin") {
+    mobileNavItems.push({ href: "/admin", label: "Admin" });
+  }
+
   return (
     <nav className="border-b border-neutral-800 bg-neutral-900 px-4 py-3 md:px-6">
       <div className="flex items-center justify-between">
@@ -63,6 +77,17 @@ export function Navbar() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="mt-4 space-y-2 md:hidden pb-4 border-t border-neutral-800 pt-4">
+          {mobileNavItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setMobileMenuOpen(false)}
+              className="block w-full px-3 py-2 rounded-md text-sm text-neutral-200 hover:bg-neutral-800"
+            >
+              {item.label}
+            </Link>
+          ))}
+
           {session ? (
             <>
               <div className="text-sm text-neutral-400 px-2">{session.user?.name}</div>

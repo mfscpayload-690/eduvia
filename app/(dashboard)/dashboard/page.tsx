@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Clock, MapPin, Calendar, Heart } from "lucide-react";
+import { BookOpen, Clock, MapPin, Calendar, Heart, Settings } from "lucide-react";
 
 const quickLinks = [
   {
@@ -38,6 +38,12 @@ const quickLinks = [
     label: "Lost & Found",
     description: "Report or find lost items",
     icon: <Heart className="w-8 h-8" />,
+  },
+  {
+    href: "/settings",
+    label: "Profile",
+    description: "View and update your profile",
+    icon: <Settings className="w-8 h-8" />,
   },
 ];
 
