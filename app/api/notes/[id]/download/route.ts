@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
+import { getNoteById } from "@/lib/supabase";
 
 /**
  * GET /api/notes/:id/download
@@ -7,20 +8,16 @@ import { requireAuth } from "@/lib/auth";
  */
 export async function GET(
   _req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     await requireAuth();
-    const { id } = await params;
-
-    // In a real implementation, you would fetch the note from Supabase
-    // and get its drive_url, then redirect to it
-    console.log("Note ID for download:", id);
-
-    return NextResponse.json(
-      { error: "Note not found" },
-      { status: 404 }
-    );
+    const { id } = params;
+    const note = await getNoteById(id);
+    if (!note) {
+      return NextResponse.json({ error: "Note not found" }, { status: 404 });
+    }
+    return NextResponse.redirect(note.drive_url);
   } catch (error) {
     console.error("GET /api/notes/:id/download error:", error);
     return NextResponse.json(

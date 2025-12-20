@@ -1,16 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Download } from "lucide-react";
 import Link from "next/link";
 import type { Note } from "@/lib/types";
+import { extractFileId, getPreviewUrl, getDownloadUrl } from "@/lib/drive";
 
 export default function NotePage({ params }: { params: { id: string } }) {
   const [note, setNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [useAltViewer, setUseAltViewer] = useState(false);
 
   useEffect(() => {
     async function fetchNote() {
@@ -28,6 +30,27 @@ export default function NotePage({ params }: { params: { id: string } }) {
 
     fetchNote();
   }, [params.id]);
+
+  const { previewSrc, altViewerSrc, driveOpenUrl } = useMemo(() => {
+    if (!note) return { previewSrc: "", altViewerSrc: "", driveOpenUrl: "" };
+    const fid = note.file_id || (() => {
+      try {
+        return extractFileId(note.drive_url);
+      } catch (err) {
+        console.warn("Failed to derive preview URL", err);
+        return "";
+      }
+    })();
+
+    if (!fid) return { previewSrc: note.drive_url, altViewerSrc: note.drive_url, driveOpenUrl: note.drive_url };
+
+    const primary = getPreviewUrl(fid);
+    const downloadUrl = getDownloadUrl(fid);
+    const alt = `https://drive.google.com/viewerng/viewer?embedded=true&url=${encodeURIComponent(downloadUrl)}`;
+    const open = `https://drive.google.com/file/d/${fid}/view`;
+
+    return { previewSrc: primary, altViewerSrc: alt, driveOpenUrl: open };
+  }, [note]);
 
   if (loading) {
     return (
@@ -80,10 +103,27 @@ export default function NotePage({ params }: { params: { id: string } }) {
 
           <div className="pt-4 border-t border-neutral-800">
             <p className="text-sm text-neutral-400 mb-3">PDF Preview:</p>
-            <div className="bg-neutral-800 rounded-lg p-4 text-center">
-              <p className="text-neutral-500 text-sm">
-                PDF preview not yet implemented. Please download the file to view it.
-              </p>
+            <div className="bg-neutral-900 rounded-lg overflow-hidden border border-neutral-800">
+              <iframe
+                key={useAltViewer ? altViewerSrc : previewSrc}
+                src={useAltViewer ? altViewerSrc : previewSrc}
+                className="w-full h-96"
+                allow="autoplay"
+                title={`Preview of ${note.title}`}
+              />
+            </div>
+            <div className="flex flex-wrap items-center gap-3 pt-3 text-sm text-neutral-400">
+              <span>If preview fails, try the alternate viewer or open in Drive (ensure file is shared: Anyone with the link → Viewer).</span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setUseAltViewer((v) => !v)}>
+                  {useAltViewer ? "Use default viewer" : "Try alternate viewer"}
+                </Button>
+                {driveOpenUrl && (
+                  <a href={driveOpenUrl} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" size="sm">Open in Drive</Button>
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </CardContent>

@@ -38,6 +38,12 @@ CREATE TABLE notes (
 CREATE INDEX idx_notes_course ON notes(course);
 CREATE INDEX idx_notes_created_at ON notes(created_at DESC);
 
+-- Optional: Extend notes with semester/year_of_study for precise filtering
+ALTER TABLE notes ADD COLUMN IF NOT EXISTS semester INTEGER;
+ALTER TABLE notes ADD COLUMN IF NOT EXISTS year_of_study INTEGER;
+CREATE INDEX IF NOT EXISTS idx_notes_semester ON notes(semester);
+CREATE INDEX IF NOT EXISTS idx_notes_year ON notes(year_of_study);
+
 -- ============================================================================
 -- Timetable Table
 -- ============================================================================

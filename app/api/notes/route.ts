@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getNotes, createNote } from "@/lib/supabase";
+import { getNotes, getNotesByCourseSemYear, createNote, getUserByEmail } from "@/lib/supabase";
 import { requireAuth, requireAdmin } from "@/lib/auth";
 
 /**
@@ -8,8 +8,19 @@ import { requireAuth, requireAdmin } from "@/lib/auth";
  */
 export async function GET() {
   try {
-    await requireAuth();
-    const notes = await getNotes();
+    const session = await requireAuth();
+
+    // Admins see everything; students see notes for their course only
+    let notes;
+    if (session.user.role === "admin") {
+      notes = await getNotes();
+    } else {
+      const user = await getUserByEmail(session.user.email);
+      const course = user?.branch || "";
+      const semester = user?.semester;
+      const year = user?.year_of_study;
+      notes = course ? await getNotesByCourseSemYear(course, semester, year) : [];
+    }
 
     return NextResponse.json({
       success: true,
@@ -33,7 +44,7 @@ export async function POST(req: Request) {
     const session = await requireAdmin();
 
     const body = await req.json();
-    const { title, course, file_id, drive_url } = body;
+    const { title, course, file_id, drive_url, semester, year_of_study } = body;
 
     if (!title || !course || !file_id || !drive_url) {
       return NextResponse.json(
@@ -47,6 +58,8 @@ export async function POST(req: Request) {
       course,
       file_id,
       drive_url,
+      semester,
+      year_of_study,
       created_by: session.user.id,
     });
 

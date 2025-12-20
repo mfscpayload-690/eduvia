@@ -77,6 +77,30 @@ export async function getNotes(): Promise<Note[]> {
   return data || [];
 }
 
+export async function getNotesByCourse(course: string): Promise<Note[]> {
+  const { data, error } = await supabase
+    .from("notes")
+    .select("*")
+    .eq("course", course)
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(`Failed to fetch notes by course: ${error.message}`);
+  return data || [];
+}
+
+export async function getNotesByCourseSemYear(
+  course: string,
+  semester?: number,
+  year_of_study?: number
+): Promise<Note[]> {
+  let query = supabase.from("notes").select("*").eq("course", course);
+  if (typeof semester === "number") query = query.eq("semester", semester);
+  if (typeof year_of_study === "number") query = query.eq("year_of_study", year_of_study);
+  const { data, error } = await query.order("created_at", { ascending: false });
+  if (error) throw new Error(`Failed to fetch filtered notes: ${error.message}`);
+  return data || [];
+}
+
 export async function getNoteById(id: string): Promise<Note | null> {
   const { data, error } = await supabase
     .from("notes")
@@ -105,6 +129,30 @@ export async function createNote(
 
   if (error) throw new Error(`Failed to create note: ${error.message}`);
   return data;
+}
+
+export async function updateNote(
+  id: string,
+  note: Partial<Omit<Note, "id" | "created_at">>
+): Promise<Note> {
+  const { data, error } = await supabase
+    .from("notes")
+    .update(note)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw new Error(`Failed to update note: ${error.message}`);
+  return data;
+}
+
+export async function deleteNote(id: string): Promise<void> {
+  const { error } = await supabase
+    .from("notes")
+    .delete()
+    .eq("id", id);
+
+  if (error) throw new Error(`Failed to delete note: ${error.message}`);
 }
 
 // ============================================================================

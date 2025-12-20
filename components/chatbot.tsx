@@ -49,7 +49,7 @@ export function Chatbot() {
         },
       ]);
     }
-  }, [status, username]);
+  }, [status, username, history.length]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });

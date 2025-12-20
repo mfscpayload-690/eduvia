@@ -62,6 +62,8 @@ export interface Note {
   course: string;
   file_id: string; // Google Drive file ID
   drive_url: string; // Direct download URL
+  semester?: number;
+  year_of_study?: number;
   created_by: string; // User ID
   created_at: Date;
 }
@@ -71,6 +73,8 @@ export interface CreateNoteDTO {
   course: string;
   file_id: string;
   drive_url: string;
+  semester?: number;
+  year_of_study?: number;
 }
 
 // ============================================================================

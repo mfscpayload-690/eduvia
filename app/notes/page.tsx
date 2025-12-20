@@ -45,6 +45,9 @@ export default function NotesPage() {
           Course Notes
         </h1>
         <p className="text-neutral-400 mt-2">Download or preview course materials</p>
+        <div className="mt-3 rounded-md border border-blue-500/30 bg-blue-500/10 px-3 py-2 text-sm text-blue-300">
+          All notes are based on <span className="font-semibold">KTU 2024 Scheme</span>.
+        </div>
       </div>
 
       {error && (
