@@ -1,5 +1,5 @@
 import GoogleProvider from "next-auth/providers/google";
-import { getOrCreateUser } from "@/lib/supabase";
+import { getOrCreateUser, updateUserRole } from "@/lib/supabase";
 import type { AuthOptions } from "next-auth";
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
@@ -36,6 +36,18 @@ export const authOptions: AuthOptions = {
           account.providerAccountId
         );
 
+        // Promote to admin if email is in allowlist
+        const allowlist = (process.env.ADMIN_EMAILS || "")
+          .split(",")
+          .map((e) => e.trim().toLowerCase())
+          .filter(Boolean);
+
+        const emailLower = user.email.toLowerCase();
+        if (allowlist.includes(emailLower) && dbUser.role !== "admin") {
+          await updateUserRole(user.email, "admin");
+          dbUser.role = "admin";
+        }
+
         // Store user data for JWT
         user.id = dbUser.id;
         user.role = dbUser.role;
@@ -53,6 +65,7 @@ export const authOptions: AuthOptions = {
         token.id = user.id;
         token.role = user.role;
         token.profile_completed = user.profile_completed;
+        token.email = user.email;
       }
       
       // Refresh profile_completed status when session is updated

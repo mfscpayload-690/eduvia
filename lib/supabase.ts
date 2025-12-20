@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import type { User, Note, TimetableEntry, Event, LostFoundItem } from "./types";
+import type { User, Note, TimetableEntry, Event, LostFoundItem, UserRole } from "./types";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -52,6 +52,15 @@ export async function getUserByEmail(email: string): Promise<User | null> {
   }
 
   return data || null;
+}
+
+export async function updateUserRole(email: string, role: UserRole): Promise<void> {
+  const { error } = await supabase
+    .from("users")
+    .update({ role })
+    .eq("email", email);
+
+  if (error) throw new Error(`Failed to update user role: ${error.message}`);
 }
 
 // ============================================================================
@@ -178,6 +187,30 @@ export async function createEvent(event: Omit<Event, "id">): Promise<Event> {
 
   if (error) throw new Error(`Failed to create event: ${error.message}`);
   return data;
+}
+
+export async function updateEvent(
+  id: string,
+  event: Partial<Omit<Event, "id">>
+): Promise<Event> {
+  const { data, error } = await supabase
+    .from("events")
+    .update(event)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw new Error(`Failed to update event: ${error.message}`);
+  return data;
+}
+
+export async function deleteEvent(id: string): Promise<void> {
+  const { error } = await supabase
+    .from("events")
+    .delete()
+    .eq("id", id);
+
+  if (error) throw new Error(`Failed to delete event: ${error.message}`);
 }
 
 // ============================================================================

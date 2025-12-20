@@ -113,14 +113,14 @@ export function Chatbot() {
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed left-4 bottom-20 z-50 w-[92vw] max-w-md"
+            className="fixed left-4 right-4 bottom-20 sm:left-auto sm:right-4 sm:w-96 z-50 sm:bottom-20"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 26 }}
           >
-            <div className="rounded-xl border border-neutral-200 bg-white shadow-xl dark:border-neutral-800 dark:bg-neutral-900">
-              <div className="flex items-center justify-between px-3 py-2 border-b border-neutral-200 dark:border-neutral-800">
+            <div className="rounded-xl border border-neutral-200 bg-white shadow-xl dark:border-neutral-800 dark:bg-neutral-900 flex flex-col h-[70vh] sm:h-96">
+              <div className="flex items-center justify-between px-3 py-2 border-b border-neutral-200 dark:border-neutral-800 select-none shrink-0">
                 <div className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Eduvia Assistant</div>
                 <button
                   onClick={() => setOpen(false)}
@@ -131,11 +131,11 @@ export function Chatbot() {
                 </button>
               </div>
 
-              <div className="max-h-[60vh] overflow-y-auto p-3 space-y-3">
+              <div className="flex-1 overflow-y-auto p-3 space-y-3">
                 {history.map((m, idx) => (
                   <div key={idx} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                     <div
-                      className={`rounded-2xl px-3 py-2 shadow ${
+                      className={`rounded-2xl px-3 py-2 shadow max-w-xs sm:max-w-sm ${
                         m.role === "user"
                           ? "bg-blue-600 text-white"
                           : "bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100"
@@ -199,7 +199,7 @@ export function Chatbot() {
               </div>
 
               {followups.length > 0 && (
-                <div className="px-3 pt-2 flex flex-wrap gap-2">
+                <div className="px-3 pt-2 flex flex-wrap gap-2 shrink-0">
                   {followups.map((s, i) => (
                     <button
                       key={i}
@@ -217,7 +217,7 @@ export function Chatbot() {
                   e.preventDefault();
                   if (!sending) send();
                 }}
-                className="flex items-center gap-2 p-3"
+                className="flex items-center gap-2 p-3 border-t border-neutral-200 dark:border-neutral-800 shrink-0"
               >
                 <input
                   value={input}

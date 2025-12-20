@@ -1,11 +1,12 @@
 import { getServerSession as nextAuthGetServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth-config";
 import type { Session } from "./types";
 
 /**
  * Get the current server session with full type safety
  */
 export async function getServerSession(): Promise<Session | null> {
-  const session = await nextAuthGetServerSession();
+  const session = await nextAuthGetServerSession(authOptions);
 
   if (!session || !session.user) {
     return null;

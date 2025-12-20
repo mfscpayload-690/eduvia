@@ -1,7 +1,13 @@
-"use client";
-
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { Settings } from "lucide-react";
+import { Settings, BookOpen, CalendarClock, CalendarDays, Package } from "lucide-react";
+
+const tiles = [
+  { href: "/admin/notes", title: "Notes", description: "Upload and manage study notes", icon: BookOpen },
+  { href: "/admin/timetable", title: "Timetable", description: "Manage class schedules", icon: CalendarClock },
+  { href: "/admin/events", title: "Events", description: "Create and edit events", icon: CalendarDays },
+  { href: "/admin/lostfound", title: "Lost & Found", description: "Review and update items", icon: Package },
+];
 
 export default function AdminPage() {
   return (
@@ -15,26 +21,24 @@ export default function AdminPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardContent className="pt-6 text-center py-12">
-            <p className="text-neutral-400">Notes Management</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6 text-center py-12">
-            <p className="text-neutral-400">Timetable Management</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6 text-center py-12">
-            <p className="text-neutral-400">Events Management</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6 text-center py-12">
-            <p className="text-neutral-400">Lost & Found Management</p>
-          </CardContent>
-        </Card>
+        {tiles.map(({ href, title, description, icon: Icon }) => (
+          <Link key={href} href={href} className="group">
+            <Card className="h-full border-neutral-200 transition hover:border-blue-500 hover:shadow-lg dark:border-neutral-800 dark:hover:border-blue-400">
+              <CardContent className="pt-6 pb-8 px-4 flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-md bg-blue-50 p-2 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-base font-semibold text-neutral-900 dark:text-neutral-50">{title}</p>
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400">{description}</p>
+                  </div>
+                </div>
+                <p className="text-sm text-blue-600 group-hover:underline dark:text-blue-300">Open</p>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
       </div>
     </div>
   );
