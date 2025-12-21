@@ -6,9 +6,15 @@ import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Clock, MapPin, Calendar, Heart, Settings } from "lucide-react";
+import { BookOpen, Clock, MapPin, Calendar, Heart, Settings, Sparkles } from "lucide-react";
 
 const quickLinks = [
+  {
+    href: "/eduvia-ai",
+    label: "eduvia AI",
+    description: "Ask AI anything about your studies",
+    icon: <Sparkles className="w-8 h-8" />,
+  },
   {
     href: "/notes",
     label: "Course Notes",

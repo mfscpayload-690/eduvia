@@ -10,6 +10,7 @@ import {
   Calendar,
   Heart,
   Settings,
+  Sparkles,
 } from "lucide-react";
 
 interface NavItem {
@@ -24,6 +25,11 @@ const navItems: NavItem[] = [
     href: "/dashboard",
     label: "Dashboard",
     icon: <Clock size={20} />,
+  },
+  {
+    href: "/eduvia-ai",
+    label: "eduvia AI",
+    icon: <Sparkles size={20} />,
   },
   {
     href: "/notes",

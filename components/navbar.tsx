@@ -13,6 +13,7 @@ export function Navbar() {
 
   const mobileNavItems = [
     { href: "/dashboard", label: "Dashboard" },
+    { href: "/eduvia-ai", label: "eduvia AI" },
     { href: "/notes", label: "Course Notes" },
     { href: "/timetable", label: "Timetable" },
     { href: "/classfinder", label: "Classroom Finder" },
@@ -38,26 +39,32 @@ export function Navbar() {
           eduvia
         </Link>
 
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2 text-neutral-700 hover:bg-neutral-100 rounded-md transition-colors dark:text-neutral-300 dark:hover:bg-neutral-800"
-          aria-label="Toggle mobile menu"
-        >
-          <Menu size={20} />
-        </button>
+        {/* Right Section (theme + mobile menu) */}
+        <div className="flex items-center gap-3">
+          <div className="md:hidden">
+            <ThemeToggle />
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 text-neutral-700 hover:bg-neutral-100 rounded-md transition-colors dark:text-neutral-300 dark:hover:bg-neutral-800"
+            aria-label="Toggle mobile menu"
+          >
+            <Menu size={20} />
+          </button>
+        </div>
 
         {/* Desktop Auth Section */}
         <div className="hidden md:flex items-center gap-4">
-          <ThemeToggle />
           {session ? (
             <>
+              <ThemeToggle />
               <span className="text-sm text-neutral-400">{session.user?.name}</span>
               <Button
                 onClick={() => signOut()}
-                variant="ghost"
                 size="sm"
-                className="gap-2"
+                className="gap-2 bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-500/30 hover:shadow-[0_0_0_8px_rgba(248,113,113,0.35)] focus:ring-2 focus:ring-red-300"
               >
                 <LogOut size={16} />
                 Sign Out
@@ -79,9 +86,6 @@ export function Navbar() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="mt-4 space-y-2 md:hidden pb-4 border-t border-neutral-200 pt-4 dark:border-neutral-800">
-          <div className="px-2">
-            <ThemeToggle />
-          </div>
           {mobileNavItems.map((item) => (
             <Link
               key={item.href}
@@ -101,9 +105,8 @@ export function Navbar() {
                   signOut();
                   setMobileMenuOpen(false);
                 }}
-                variant="ghost"
                 size="sm"
-                className="w-full justify-start gap-2"
+                className="w-full justify-start gap-2 bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-500/30 hover:shadow-[0_0_0_8px_rgba(248,113,113,0.35)] focus:ring-2 focus:ring-red-300"
               >
                 <LogOut size={16} />
                 Sign Out

@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { Sidebar } from "@/components/sidebar";
 import { Chatbot } from "@/components/chatbot";
+import { BackHomeButton } from "@/components/back-home";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -22,6 +23,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <Navbar />
         <main className="flex-1 overflow-auto">{children}</main>
         <Chatbot />
+        <BackHomeButton />
       </div>
     </div>
   );
