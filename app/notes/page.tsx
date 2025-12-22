@@ -32,58 +32,68 @@ export default function NotesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <p className="text-neutral-400">Loading notes...</p>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-8">
-      <div>
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <BookOpen className="w-8 h-8 text-blue-500" />
+    <div className="space-y-8 p-4 md:p-8">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold font-heading flex items-center gap-3">
+          <BookOpen className="w-8 h-8 text-brand-500" />
           Course Notes
         </h1>
-        <p className="text-neutral-400 mt-2">Download or preview course materials</p>
-        <div className="mt-3 rounded-md border border-blue-500/30 bg-blue-500/10 px-3 py-2 text-sm text-blue-300">
-          All notes are based on <span className="font-semibold">KTU 2024 Scheme</span>.
+        <p className="text-muted-foreground">Download or preview course materials shared by faculty.</p>
+        <div className="mt-2 inline-flex items-center w-fit rounded-lg border border-brand-500/20 bg-brand-500/10 px-4 py-2 text-sm text-brand-600 dark:text-brand-400">
+          <span className="font-medium mr-2">Update:</span> All notes are based on <span className="font-bold ml-1">KTU 2024 Scheme</span>.
         </div>
       </div>
 
       {error && (
-        <div className="p-4 bg-red-900/20 border border-red-800 rounded-lg text-red-200">
+        <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
           {error}
         </div>
       )}
 
       {notes.length === 0 ? (
-        <Card>
-          <CardContent className="pt-6 text-center py-12">
-            <BookOpen className="w-12 h-12 text-neutral-600 mx-auto mb-4" />
-            <p className="text-neutral-400">No notes available yet.</p>
+        <Card className="glass-card border-dashed border-2 border-border/50">
+          <CardContent className="pt-6 text-center py-16 flex flex-col items-center">
+            <div className="p-4 rounded-full bg-muted mb-4">
+              <BookOpen className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-medium mb-1">No notes available yet</h3>
+            <p className="text-muted-foreground max-w-xs">Check back later once your faculty uploads new course materials.</p>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {notes.map((note) => (
-            <Card key={note.id} className="hover:border-blue-600 transition-colors">
+            <Card key={note.id} className="glass-card border-border/50 hover:border-brand-500/30 transition-all duration-300 hover:shadow-lg group">
               <CardHeader>
-                <CardTitle className="text-lg line-clamp-2">{note.title}</CardTitle>
-                <CardDescription>{note.course}</CardDescription>
+                <div className="flex justify-between items-start gap-2">
+                  <CardTitle className="text-lg font-heading line-clamp-2 group-hover:text-brand-500 transition-colors">{note.title}</CardTitle>
+                  <div className="p-2 rounded-lg bg-muted/50 group-hover:bg-brand-500/10 transition-colors">
+                    <BookOpen size={16} className="text-muted-foreground group-hover:text-brand-500" />
+                  </div>
+                </div>
+                <CardDescription className="line-clamp-1">{note.course}</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-sm text-neutral-400">
-                  {new Date(note.created_at).toLocaleDateString()}
-                </p>
-                <div className="flex gap-2">
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span className="px-2 py-0.5 rounded-full bg-muted">PDF</span>
+                  <span>•</span>
+                  <span>{new Date(note.created_at).toLocaleDateString()}</span>
+                </div>
+                <div className="flex gap-3">
                   <Link href={`/notes/${note.id}`} className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full gap-2">
+                    <Button variant="outline" size="sm" className="w-full gap-2 border-border/50 hover:bg-muted">
                       <ExternalLink size={16} />
-                      View
+                      Preview
                     </Button>
                   </Link>
                   <a href={note.drive_url} target="_blank" rel="noopener noreferrer" className="flex-1">
-                    <Button size="sm" className="w-full gap-2 bg-blue-600 hover:bg-blue-700">
+                    <Button size="sm" className="w-full gap-2 bg-gradient-brand hover:opacity-90 border-0 text-white">
                       <Download size={16} />
                       Download
                     </Button>

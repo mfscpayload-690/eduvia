@@ -1,18 +1,17 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Download } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowLeft, Download, ExternalLink, FileText } from "lucide-react";
 import Link from "next/link";
 import type { Note } from "@/lib/types";
-import { extractFileId, getPreviewUrl, getDownloadUrl } from "@/lib/drive";
+import { extractFileId, getPreviewUrl } from "@/lib/drive";
 
 export default function NotePage({ params }: { params: { id: string } }) {
   const [note, setNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [useAltViewer, setUseAltViewer] = useState(false);
 
   useEffect(() => {
     async function fetchNote() {
@@ -31,31 +30,10 @@ export default function NotePage({ params }: { params: { id: string } }) {
     fetchNote();
   }, [params.id]);
 
-  const { previewSrc, altViewerSrc, driveOpenUrl } = useMemo(() => {
-    if (!note) return { previewSrc: "", altViewerSrc: "", driveOpenUrl: "" };
-    const fid = note.file_id || (() => {
-      try {
-        return extractFileId(note.drive_url);
-      } catch (err) {
-        console.warn("Failed to derive preview URL", err);
-        return "";
-      }
-    })();
-
-    if (!fid) return { previewSrc: note.drive_url, altViewerSrc: note.drive_url, driveOpenUrl: note.drive_url };
-
-    const primary = getPreviewUrl(fid);
-    const downloadUrl = getDownloadUrl(fid);
-    const alt = `https://drive.google.com/viewerng/viewer?embedded=true&url=${encodeURIComponent(downloadUrl)}`;
-    const open = `https://drive.google.com/file/d/${fid}/view`;
-
-    return { previewSrc: primary, altViewerSrc: alt, driveOpenUrl: open };
-  }, [note]);
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-neutral-400">Loading...</p>
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
       </div>
     );
   }
@@ -64,70 +42,104 @@ export default function NotePage({ params }: { params: { id: string } }) {
     return (
       <div className="p-4 md:p-8 space-y-4">
         <Link href="/notes">
-          <Button variant="ghost" className="gap-2">
+          <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground">
             <ArrowLeft size={16} />
             Back to Notes
           </Button>
         </Link>
-        <div className="p-4 bg-red-900/20 border border-red-800 rounded-lg text-red-200">
+        <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
           {error || "Note not found"}
         </div>
       </div>
     );
   }
 
+  // Calculate drive preview link (standard view link)
+  const drivePreviewLink = note.file_id
+    ? `https://drive.google.com/file/d/${note.file_id}/preview`
+    : note.drive_url;
+
   return (
-    <div className="p-4 md:p-8 space-y-6 max-w-4xl mx-auto">
+    <div className="p-4 md:p-8 space-y-6 max-w-5xl mx-auto">
       <Link href="/notes">
-        <Button variant="ghost" className="gap-2">
+        <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground pl-0 hover:bg-transparent">
           <ArrowLeft size={16} />
           Back to Notes
         </Button>
       </Link>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">{note.title}</CardTitle>
-          <CardDescription className="space-y-1">
-            <p>{note.course}</p>
-            <p>{new Date(note.created_at).toLocaleDateString()}</p>
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <a href={note.drive_url} target="_blank" rel="noopener noreferrer">
-            <Button className="gap-2 bg-blue-600 hover:bg-blue-700">
-              <Download size={18} />
-              Download PDF
-            </Button>
-          </a>
-
-          <div className="pt-4 border-t border-neutral-800">
-            <p className="text-sm text-neutral-400 mb-3">PDF Preview:</p>
-            <div className="bg-neutral-900 rounded-lg overflow-hidden border border-neutral-800">
-              <iframe
-                key={useAltViewer ? altViewerSrc : previewSrc}
-                src={useAltViewer ? altViewerSrc : previewSrc}
-                className="w-full h-96"
-                allow="autoplay"
-                title={`Preview of ${note.title}`}
-              />
-            </div>
-            <div className="flex flex-wrap items-center gap-3 pt-3 text-sm text-neutral-400">
-              <span>If preview fails, try the alternate viewer or open in Drive (ensure file is shared: Anyone with the link → Viewer).</span>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => setUseAltViewer((v) => !v)}>
-                  {useAltViewer ? "Use default viewer" : "Try alternate viewer"}
-                </Button>
-                {driveOpenUrl && (
-                  <a href={driveOpenUrl} target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" size="sm">Open in Drive</Button>
-                  </a>
-                )}
+      <div className="grid gap-6 md:grid-cols-[2fr_1fr]">
+        <Card className="glass-card border-border/50 overflow-hidden md:col-span-2">
+          <div className="p-6 md:p-8 border-b border-border/50 bg-muted/20">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold font-heading mb-2">{note.title}</h1>
+                <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                  <span className="px-2 py-1 rounded-md bg-brand-500/10 text-brand-600 dark:text-brand-400 font-medium">
+                    {note.course}
+                  </span>
+                  <span>•</span>
+                  <span>{new Date(note.created_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+              <div className="p-3 rounded-xl bg-gradient-brand text-white shadow-lg shadow-brand-500/20">
+                <FileText size={32} />
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+
+          <CardContent className="p-6 md:p-8 space-y-8">
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <a href={note.drive_url} target="_blank" rel="noopener noreferrer" className="flex-1">
+                <Button size="lg" className="w-full gap-2 bg-gradient-brand hover:opacity-90 border-0">
+                  <Download size={20} />
+                  Download PDF
+                </Button>
+              </a>
+              <a href={drivePreviewLink} target="_blank" rel="noopener noreferrer" className="flex-1">
+                <Button size="lg" variant="outline" className="w-full gap-2 border-brand-500/20 hover:bg-brand-500/5 hover:text-brand-600 dark:hover:text-brand-400">
+                  <ExternalLink size={20} />
+                  Open Full Preview
+                </Button>
+              </a>
+            </div>
+
+            {/* Embedded Preview (Attempted) */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <div className="w-1 h-6 bg-brand-500 rounded-full" />
+                  Quick Preview
+                </h2>
+                <span className="text-xs text-muted-foreground">Powered by Google Drive</span>
+              </div>
+
+              <div className="aspect-[16/10] w-full rounded-xl border border-border bg-muted/30 overflow-hidden relative group">
+                <iframe
+                  src={drivePreviewLink}
+                  className="w-full h-full"
+                  allow="autoplay"
+                  title="PDF Preview"
+                />
+                {/* Fallback overlay if iframe is blocked (visually indicates external open) */}
+                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-300">
+                  <p className="text-sm font-medium mb-3">Better viewing experience?</p>
+                  <a href={drivePreviewLink} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="gap-2">
+                      <ExternalLink size={16} />
+                      Open in New Tab
+                    </Button>
+                  </a>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground text-center">
+                If the preview doesn't load, use the "Open Full Preview" button above.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
