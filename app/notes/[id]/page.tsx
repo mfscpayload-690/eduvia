@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Download, ExternalLink, FileText } from "lucide-react";
 import Link from "next/link";
 import type { Note } from "@/lib/types";
-import { extractFileId, getPreviewUrl } from "@/lib/drive";
+// import { extractFileId, getPreviewUrl } from "@/lib/drive"; // Removed unused import
 
 export default function NotePage({ params }: { params: { id: string } }) {
   const [note, setNote] = useState<Note | null>(null);
@@ -134,7 +134,7 @@ export default function NotePage({ params }: { params: { id: string } }) {
                 </div>
               </div>
               <p className="text-xs text-muted-foreground text-center">
-                If the preview doesn't load, use the "Open Full Preview" button above.
+                If the preview doesn&apos;t load, use the &quot;Open Full Preview&quot; button above.
               </p>
             </div>
           </CardContent>
