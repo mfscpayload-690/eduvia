@@ -109,20 +109,39 @@ export async function getNotesByUserProfile(
   if (error) throw new Error(`Failed to fetch notes: ${error.message}`);
   if (!data) return [];
 
+  // Normalize branch for robust matching (remove spaces, lowercase)
+  const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, "");
+  const studentBranch = normalize(branch || "");
+
   // Filter notes based on user's profile
-  return data.filter(note => {
+  const filtered = data.filter(note => {
     // Check branch: match if branches is empty/null OR user's branch is included
-    const branchMatch = !note.branches || note.branches.length === 0 || note.branches.includes(branch);
+    const branchMatch = !note.branches || note.branches.length === 0 ||
+      note.branches.some((b: string) => {
+        const nb = normalize(b);
+        return nb === studentBranch || nb.includes(studentBranch) || studentBranch.includes(nb);
+      });
 
     // Check semester: match if semesters is empty/null OR user's semester is included
     const semesterMatch = !note.semesters || note.semesters.length === 0 ||
-      (typeof semester === "number" && note.semesters.includes(semester));
+      (semester !== undefined && note.semesters.some((s: number) => Number(s) === Number(semester)));
 
     // Check year: match if year_of_study is null OR matches user's year
-    const yearMatch = !note.year_of_study || note.year_of_study === year_of_study;
+    const yearMatch = !note.year_of_study || Number(note.year_of_study) === Number(year_of_study);
 
-    return branchMatch && semesterMatch && yearMatch;
+    const isMatch = branchMatch && semesterMatch && yearMatch;
+
+    if (!isMatch) {
+      console.log(`DEBUG: Note "${note.title}" excluded - BranchMatch: ${branchMatch}, SemMatch: ${semesterMatch}, YearMatch: ${yearMatch}`);
+      if (!branchMatch) console.log(`  Expected branch (normalized): "${studentBranch}", Note branches:`, note.branches?.map(normalize));
+      if (!semesterMatch) console.log(`  Expected sem: ${semester}, Note sems:`, note.semesters);
+      if (!yearMatch) console.log(`  Expected year: ${year_of_study}, Note year:`, note.year_of_study);
+    }
+
+    return isMatch;
   });
+
+  return filtered;
 }
 
 export async function getNoteById(id: string): Promise<Note | null> {

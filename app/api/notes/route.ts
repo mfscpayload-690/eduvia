@@ -19,7 +19,11 @@ export async function GET() {
       const branch = user?.branch || "";
       const semester = user?.semester;
       const year = user?.year_of_study;
+
+      console.log("DEBUG: Notes filter - User:", { email: session.user.email, branch, semester, year });
+
       notes = await getNotesByUserProfile(branch, semester, year);
+      console.log(`DEBUG: Found ${notes.length} notes after filtering`);
     }
 
     return NextResponse.json({
