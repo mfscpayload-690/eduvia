@@ -78,7 +78,7 @@ export default function Settings() {
     if (status === "authenticated") {
       fetchProfile();
     }
-  }, [status]);
+  }, [status, session?.user?.name]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

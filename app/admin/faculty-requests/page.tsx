@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +17,7 @@ export default function FacultyRequestsPage() {
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [filter, setFilter] = useState<StatusFilter>("pending");
 
-    const fetchRequests = async () => {
+    const fetchRequests = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -38,13 +38,13 @@ export default function FacultyRequestsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [filter]);
 
     useEffect(() => {
         if (status === "authenticated") {
             fetchRequests();
         }
-    }, [status, filter]);
+    }, [status, fetchRequests]);
 
     const handleAction = async (requestId: string, action: "approve" | "reject") => {
         try {

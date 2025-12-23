@@ -117,10 +117,10 @@ export default function NotePage({ params }: { params: { id: string } }) {
                     <BookOpen size={14} />
                     {note.course}
                   </span>
-                  {note.semester && (
+                  {note.semesters && note.semesters.length > 0 && (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
                       <Calendar size={14} />
-                      Semester {note.semester}
+                      Semesters: {note.semesters.join(", ")}
                     </span>
                   )}
                   {note.year_of_study && (
