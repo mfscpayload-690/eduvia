@@ -87,6 +87,7 @@ export interface Note {
   course: string;
   file_id: string; // Google Drive file ID
   drive_url: string; // Direct download URL
+  branches?: string[]; // Array of branch names this note applies to
   semester?: number;
   year_of_study?: number;
   created_by: string; // User ID
@@ -98,6 +99,7 @@ export interface CreateNoteDTO {
   course: string;
   file_id: string;
   drive_url: string;
+  branches?: string[];
   semester?: number;
   year_of_study?: number;
 }
