@@ -209,12 +209,18 @@ export default function AdminNotesPage() {
                 key={note.id}
                 className="rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-800 flex items-start justify-between"
               >
-                <div className="flex-1">
-                  <div className="font-semibold">{note.title}</div>
-                  <div className="text-neutral-500 text-xs">Course: {note.course}</div>
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="font-semibold truncate" title={note.title}>
+                    {note.title}
+                  </div>
+                  <div className="text-neutral-500 text-xs truncate" title={note.course}>
+                    Course: {note.course}
+                  </div>
                   {note.semester && <div className="text-neutral-500 text-xs">Sem: {note.semester}</div>}
                   {note.year_of_study && <div className="text-neutral-500 text-xs">Year: {note.year_of_study}</div>}
-                  <div className="text-neutral-500 text-xs truncate">Drive URL: {note.drive_url}</div>
+                  <div className="text-neutral-500 text-xs truncate" title={note.drive_url}>
+                    Drive URL: {note.drive_url}
+                  </div>
                 </div>
                 <div className="flex gap-2 ml-2">
                   <button
