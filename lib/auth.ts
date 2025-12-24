@@ -36,6 +36,21 @@ export async function requireAdmin(): Promise<Session> {
   return session;
 }
 
+export const SUPER_ADMIN_EMAIL = "techiez690@gmail.com";
+
+/**
+ * Verify that the current user is the Super Admin (specific email)
+ */
+export async function requireSuperAdmin(): Promise<Session> {
+  const session = await getServerSession();
+
+  if (!session || session.user.email.toLowerCase() !== SUPER_ADMIN_EMAIL.toLowerCase()) {
+    throw new Error("Unauthorized: Super Admin access required");
+  }
+
+  return session;
+}
+
 /**
  * Verify that a user is authenticated
  */

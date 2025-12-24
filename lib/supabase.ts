@@ -348,3 +348,44 @@ export async function updateLostFoundItem(
   if (error) throw new Error(`Failed to update lost & found item: ${error.message}`);
   return data;
 }
+
+// ============================================================================
+// Super Admin Stats
+// ============================================================================
+
+export async function getAdminStats() {
+  const [
+    { count: totalUsers },
+    { count: students },
+    { count: admins },
+    { count: totalNotes },
+    { count: totalEvents },
+    { count: pendingRequests }
+  ] = await Promise.all([
+    supabase.from("users").select("*", { count: "exact", head: true }),
+    supabase.from("users").select("*", { count: "exact", head: true }).eq("role", "student"),
+    supabase.from("users").select("*", { count: "exact", head: true }).eq("role", "admin"),
+    supabase.from("notes").select("*", { count: "exact", head: true }),
+    supabase.from("events").select("*", { count: "exact", head: true }),
+    supabase.from("admin_requests").select("*", { count: "exact", head: true }).eq("status", "pending")
+  ]);
+
+  // Get recent signups (last 7 days)
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  const { data: recentUsers } = await supabase
+    .from("users")
+    .select("created_at")
+    .gte("created_at", sevenDaysAgo.toISOString());
+
+  return {
+    totalUsers: totalUsers || 0,
+    students: students || 0,
+    admins: admins || 0,
+    totalNotes: totalNotes || 0,
+    totalEvents: totalEvents || 0,
+    pendingRequests: pendingRequests || 0,
+    recentSignups: recentUsers?.length || 0
+  };
+}

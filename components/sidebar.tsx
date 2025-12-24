@@ -11,6 +11,7 @@ import {
   Heart,
   Settings,
   Sparkles,
+  BarChart3,
 } from "lucide-react";
 
 interface NavItem {
@@ -18,6 +19,7 @@ interface NavItem {
   label: string;
   icon: React.ReactNode;
   adminOnly?: boolean;
+  superAdminOnly?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -25,6 +27,12 @@ const navItems: NavItem[] = [
     href: "/dashboard",
     label: "Dashboard",
     icon: <Clock size={20} />,
+  },
+  {
+    href: "/admin/overview",
+    label: "Overview",
+    icon: <BarChart3 size={20} />,
+    superAdminOnly: true,
   },
   {
     href: "/eduvia-ai",
@@ -74,9 +82,17 @@ export function Sidebar() {
   const { data: session } = useSession();
 
   const userRole = session?.user?.role;
-  const isAdmin = userRole === "admin" || userRole === "super_admin";
+  const userEmail = session?.user?.email?.toLowerCase();
+  const SUPER_ADMIN_EMAIL = "techiez690@gmail.com";
+
+  const isSuperAdmin = userEmail === SUPER_ADMIN_EMAIL;
+  const isAdmin = userRole === "admin" || isSuperAdmin;
 
   const filteredNavItems = navItems.filter((item) => {
+    // Super Admin Only
+    if (item.superAdminOnly && !isSuperAdmin) {
+      return false;
+    }
     // Admin only links (accessible by both admin and super_admin)
     if (item.adminOnly && !isAdmin) {
       return false;
