@@ -119,7 +119,7 @@ export async function chatWithLLM(
           } catch {
           }
         }
-        const hint = res.status === 404 || res.status === 403 
+        const hint = res.status === 404 || res.status === 403
           ? " (Check your GEMINI_API_KEY is valid and has API access enabled at https://aistudio.google.com/app/apikey)"
           : "";
         throw new Error(`LLM API error: ${res.status} ${detail}${hint}`);
@@ -135,7 +135,7 @@ export async function chatWithLLM(
         role: m.role,
         content: m.content,
       }));
-      
+
       const requestBody = {
         model: config.model,
         messages: [
@@ -147,7 +147,7 @@ export async function chatWithLLM(
       };
 
       console.log(`[LLM] Calling ${API_PROVIDER} with model ${config.model}`);
-      
+
       const response = await fetch(config.endpoint, {
         method: "POST",
         headers: {
@@ -183,3 +183,114 @@ export async function chatWithLLM(
     throw new Error(`Failed to communicate with LLM: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 }
+
+/**
+ * Chat with LLM and return a ReadableStream for real-time token streaming
+ */
+export async function chatWithLLMStreaming(
+  messages: ChatMessage[],
+  context?: string
+): Promise<ReadableStream> {
+  const config = getLLMConfig();
+  if (!config.apiKey) throw new Error(`Missing API key for ${API_PROVIDER}`);
+
+  const systemContent = context
+    ? `${SYSTEM_PROMPT}\n\nAdditional Context:\n${context}`
+    : SYSTEM_PROMPT;
+
+  const isGemini = API_PROVIDER.toLowerCase() === "gemini";
+
+  const url = isGemini
+    ? `${config.endpoint}/models/${config.model}:streamGenerateContent?alt=sse`
+    : config.endpoint;
+
+  const body = isGemini
+    ? {
+      contents: [
+        {
+          parts: [{ text: `${systemContent}\n\nUser: ${messages[messages.length - 1]?.content}` }],
+        },
+      ],
+      generationConfig: { temperature: 0.7, max_output_tokens: 1000 },
+    }
+    : {
+      model: config.model,
+      messages: [{ role: "system", content: systemContent }, ...messages],
+      temperature: 0.7,
+      max_tokens: 1000,
+      stream: true,
+    };
+
+  const response = await fetch(url + (isGemini ? `&key=${config.apiKey}` : ""), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(!isGemini && { Authorization: `Bearer ${config.apiKey}` }),
+      ...(isGemini && { "x-goog-api-key": config.apiKey }),
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`LLM Error: ${response.status} ${error}`);
+  }
+
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+
+  return new ReadableStream({
+    async start(controller) {
+      const reader = response.body?.getReader();
+      if (!reader) {
+        controller.close();
+        return;
+      }
+
+      let buffer = "";
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          buffer += chunk;
+
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+
+            if (isGemini) {
+              // Gemini SSE format: data: {"candidates": [...]}
+              if (trimmed.startsWith("data: ")) {
+                try {
+                  const json = JSON.parse(trimmed.slice(6));
+                  const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+                  if (text) controller.enqueue(encoder.encode(text));
+                } catch (e) { }
+              }
+            } else {
+              // OpenAI SSE format: data: {"choices": [...]}
+              if (trimmed === "data: [DONE]") continue;
+              if (trimmed.startsWith("data: ")) {
+                try {
+                  const json = JSON.parse(trimmed.slice(6));
+                  const content = json.choices?.[0]?.delta?.content;
+                  if (content) controller.enqueue(encoder.encode(content));
+                } catch (e) { }
+              }
+            }
+          }
+        }
+      } catch (e) {
+        controller.error(e);
+      } finally {
+        controller.close();
+      }
+    },
+  });
+}
+

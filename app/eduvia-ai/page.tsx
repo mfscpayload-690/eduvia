@@ -50,18 +50,19 @@ function MessageBubble({ role, children }: { role: Role; children: React.ReactNo
   );
 }
 
-function TypingIndicator(): JSX.Element {
+function TypingIndicator({ message }: { message?: string }): JSX.Element {
   return (
     <div className="flex gap-3">
       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-brand-500 text-white flex items-center justify-center">
         <Bot className="w-4 h-4" />
       </div>
-      <div className="bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl rounded-bl-md px-4 py-3">
+      <div className="bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl rounded-bl-md px-4 py-3 flex flex-col gap-2">
         <div className="flex gap-1">
-          <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-          <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-          <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+          <span className="w-2 h-2 bg-brand-500/50 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+          <span className="w-2 h-2 bg-brand-500/50 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+          <span className="w-2 h-2 bg-brand-500/50 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
         </div>
+        {message && <p className="text-[10px] text-neutral-500 animate-pulse font-medium">{message}</p>}
       </div>
     </div>
   );
@@ -82,6 +83,8 @@ export default function EduviaAIPage(): JSX.Element {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [history, sending]);
 
+  const [loadingStep, setLoadingStep] = useState<string>("");
+
   const send = async (): Promise<void> => {
     const message = input.trim();
     if (!message || sending) return;
@@ -91,17 +94,61 @@ export default function EduviaAIPage(): JSX.Element {
     setError(null);
     setHistory((h) => [...h, { role: "user", content: message }]);
 
+    // Dynamic loading messages
+    const steps = ["Processing query...", "Analyzing context...", "Thinking...", "Generating response..."];
+    let stepIdx = 0;
+    setLoadingStep(steps[0]);
+    const stepInterval = setInterval(() => {
+      stepIdx = (stepIdx + 1) % steps.length;
+      setLoadingStep(steps[stepIdx]);
+    }, 1500);
+
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({
+          message,
+          history: history.slice(-5)
+        }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to chat");
 
-      setHistory((h) => [...h, { role: "assistant", content: data.reply }]);
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to chat");
+      }
+
+      clearInterval(stepInterval);
+      setLoadingStep("");
+
+      // Initialize assistant message bubble
+      setHistory((h) => [...h, { role: "assistant", content: "" }]);
+
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let assistantText = "";
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          assistantText += chunk;
+
+          // Update the last message in history (the assistant message)
+          setHistory((h) => {
+            const last = h[h.length - 1];
+            if (last.role === "assistant") {
+              return [...h.slice(0, -1), { ...last, content: assistantText }];
+            }
+            return h;
+          });
+        }
+      }
     } catch (e: any) {
+      clearInterval(stepInterval);
+      setLoadingStep("");
       setHistory((h) => [
         ...h,
         { role: "assistant", content: `Sorry, I hit an issue: ${e?.message || "Unknown error"}` },
@@ -109,6 +156,7 @@ export default function EduviaAIPage(): JSX.Element {
       setError(e?.message || "Failed to chat");
     } finally {
       setSending(false);
+      setLoadingStep("");
     }
   };
 
@@ -190,33 +238,38 @@ export default function EduviaAIPage(): JSX.Element {
       {/* Messages Area - Takes all available space */}
       <div className="flex-1 overflow-y-auto min-h-0">
         <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-          {history.map((m, idx) => (
-            <MessageBubble key={idx} role={m.role as Role}>
-              {m.role === "assistant" ? (
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm, remarkMath]}
-                  rehypePlugins={[rehypeKatex]}
-                  components={{
-                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                    ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-2">{children}</ul>,
-                    ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-2">{children}</ol>,
-                    code: ({ children }) => (
-                      <code className="bg-black/30 px-1.5 py-0.5 rounded text-xs">{children}</code>
-                    ),
-                    pre: ({ children }) => (
-                      <pre className="bg-black/30 rounded-lg p-3 overflow-x-auto my-2 text-xs">{children}</pre>
-                    ),
-                  }}
-                >
-                  {m.content}
-                </ReactMarkdown>
-              ) : (
-                <div className="whitespace-pre-wrap">{m.content}</div>
-              )}
-            </MessageBubble>
-          ))}
+          {history.map((m, idx) => {
+            if (m.role === "assistant" && !m.content) return null;
+            return (
+              <MessageBubble key={idx} role={m.role as Role}>
+                {m.role === "assistant" ? (
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm, remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                    components={{
+                      p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                      ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-2">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-2">{children}</ol>,
+                      code: ({ children }) => (
+                        <code className="bg-black/30 px-1.5 py-0.5 rounded text-xs">{children}</code>
+                      ),
+                      pre: ({ children }) => (
+                        <pre className="bg-black/30 rounded-lg p-3 overflow-x-auto my-2 text-xs">{children}</pre>
+                      ),
+                    }}
+                  >
+                    {m.content}
+                  </ReactMarkdown>
+                ) : (
+                  <div className="whitespace-pre-wrap">{m.content}</div>
+                )}
+              </MessageBubble>
+            );
+          })}
 
-          {sending && <TypingIndicator />}
+          {sending && (history[history.length - 1]?.role !== "assistant" || history[history.length - 1]?.content === "") && (
+            <TypingIndicator message={loadingStep} />
+          )}
 
           <div ref={endRef} />
         </div>

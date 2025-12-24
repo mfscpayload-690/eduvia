@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Bell, Check, X, FileText, Calendar, Search, Trash2 } from "lucide-react";
+import { Bell, Check, FileText, Calendar, Clock, Package } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -18,9 +18,34 @@ export interface Notification {
     link?: string;
 }
 
-const MOCK_NOTIFICATIONS: Notification[] = [];
 
-// ...
+
+const getIcon = (type: NotificationType) => {
+    switch (type) {
+        case "CLASS_UPDATE":
+            return <Calendar className="h-4 w-4 text-blue-500" />;
+        case "NEW_NOTE":
+            return <FileText className="h-4 w-4 text-purple-500" />;
+        case "EVENT":
+            return <Clock className="h-4 w-4 text-amber-500" />;
+        case "LOST_FOUND":
+            return <Package className="h-4 w-4 text-rose-500" />;
+        default:
+            return <Bell className="h-4 w-4 text-neutral-500" />;
+    }
+};
+
+const getTimeAgo = (date: Date) => {
+    const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
+    if (seconds < 60) return "just now";
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    return new Date(date).toLocaleDateString();
+};
 
 export function NotificationCenter() {
     const [isOpen, setIsOpen] = useState(false);
@@ -96,7 +121,7 @@ export function NotificationCenter() {
                                     <Bell className="h-12 w-12 mx-auto mb-3 opacity-10" />
                                     <p className="font-medium text-sm mb-1">No notifications yet</p>
                                     <p className="text-xs text-neutral-400 dark:text-neutral-500">
-                                        You'll be notified here when classes, notes, or events are updated.
+                                        You&apos;ll be notified here when classes, notes, or events are updated.
                                     </p>
                                 </div>
                             ) : (

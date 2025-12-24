@@ -1,42 +1,35 @@
 import { NextResponse } from "next/server";
-import { chatWithLLM } from "@/lib/openai";
+import { chatWithLLMStreaming } from "@/lib/openai";
 import { requireAuth } from "@/lib/auth";
 import type { ChatMessage } from "@/lib/types";
 
-/**
- * POST /api/chat
- * Chat with the LLM-powered assistant
- */
 export async function POST(req: Request) {
   try {
     await requireAuth();
 
     const body = await req.json();
-    const { message, context } = body;
+    const { message, context, history = [] } = body;
 
     if (!message || typeof message !== "string") {
-      return NextResponse.json(
-        { error: "Message is required and must be a string" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
 
-    // Build message history (in a real app, you'd store this in the session or database)
+    // Include history for better context
     const messages: ChatMessage[] = [
-      {
-        role: "user",
-        content: message,
-      },
+      ...history.slice(-5).map((h: any) => ({ role: h.role, content: h.content })),
+      { role: "user", content: message }
     ];
 
-    const response = await chatWithLLM(messages, context);
+    const stream = await chatWithLLMStreaming(messages, context);
 
-    return NextResponse.json({
-      success: true,
-      reply: response.reply,
-      sources: response.sources,
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+      },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("POST /api/chat error:", error);
 
     if (error instanceof Error && error.message.includes("API key")) {
@@ -46,9 +39,8 @@ export async function POST(req: Request) {
       );
     }
 
-    const errorMessage = error instanceof Error ? error.message : "Failed to process chat message";
     return NextResponse.json(
-      { error: errorMessage },
+      { error: error.message || "Failed to process chat" },
       { status: 500 }
     );
   }
