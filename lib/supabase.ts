@@ -1,3 +1,4 @@
+import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import type { User, Note, TimetableEntry, Event, LostFoundItem, UserRole } from "./types";
 
