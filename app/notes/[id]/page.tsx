@@ -7,7 +7,10 @@ import { ArrowLeft, Download, Maximize2, FileText, BookOpen, Calendar, Graduatio
 import Link from "next/link";
 import type { Note } from "@/lib/types";
 
+import { useRecommendation } from "@/components/rec-engine/recommendation-context";
+
 export default function NotePage({ params }: { params: { id: string } }) {
+  const { setLastViewedNote } = useRecommendation();
   const [note, setNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,6 +23,9 @@ export default function NotePage({ params }: { params: { id: string } }) {
         if (!response.ok) throw new Error("Failed to fetch note");
         const data = await response.json();
         setNote(data.note);
+        if (data.note) {
+          setLastViewedNote(data.note.id);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useRecommendation } from "@/components/rec-engine/recommendation-context";
 import {
   Clock,
   BookOpen,
@@ -72,6 +73,7 @@ const navItems: NavItem[] = [
 export function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { checkRecommendation } = useRecommendation();
 
   const userRole = session?.user?.role;
   const isAdmin = userRole === "admin" || userRole === "super_admin";
@@ -83,6 +85,14 @@ export function Sidebar() {
     }
     return true;
   });
+
+  const handleNavClick = (href: string) => {
+    // Map href to triggers
+    if (href === '/notes') checkRecommendation('notes');
+    if (href === '/events') checkRecommendation('event');
+    if (href === '/classfinder') checkRecommendation('classroom');
+    if (href === '/lostfound') checkRecommendation('lostfound');
+  };
 
   return (
     <div className="flex h-full flex-col gap-4 p-4">
@@ -97,6 +107,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => handleNavClick(item.href)}
               className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${isActive
                 ? "bg-gradient-brand text-white shadow-lg shadow-brand-500/25"
                 : "text-muted-foreground hover:bg-neutral-200/50 dark:hover:bg-white/5 hover:text-foreground hover:scale-105"

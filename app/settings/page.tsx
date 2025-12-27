@@ -25,7 +25,10 @@ const BRANCHES: { value: BranchOfStudy; label: string; program: ProgramType }[] 
   { value: "M.Tech in Computer Science and Engineering(Cyber Forensics and Information Security)", label: "M.Tech in CS (Cyber Forensics & Information Security)", program: "M.Tech" }
 ];
 
+import { useRecommendation } from "@/components/rec-engine/recommendation-context";
+
 export default function Settings() {
+  const { settings: recSettings, updateSettings } = useRecommendation();
   const { data: session, status, update } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -340,6 +343,45 @@ export default function Settings() {
                 </Button>
               </div>
             </form>
+          </CardContent>
+        </Card>
+
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-xl">Smart Recommendations</CardTitle>
+            <CardDescription>
+              Manage how smart suggestions appear in your application.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-4">
+              <Button
+                variant={recSettings.mode === 'on' ? 'default' : 'outline'}
+                onClick={() => updateSettings({ mode: 'on' })}
+                className={recSettings.mode === 'on' ? 'bg-gradient-brand text-white border-0' : ''}
+              >
+                Always On
+              </Button>
+              <Button
+                variant={recSettings.mode === 'dashboard_only' ? 'default' : 'outline'}
+                onClick={() => updateSettings({ mode: 'dashboard_only' })}
+                className={recSettings.mode === 'dashboard_only' ? 'bg-gradient-brand text-white border-0' : ''}
+              >
+                Dashboard Only
+              </Button>
+              <Button
+                variant={recSettings.mode === 'off' ? 'default' : 'outline'}
+                onClick={() => updateSettings({ mode: 'off' })}
+                className={recSettings.mode === 'off' ? 'bg-zinc-800 text-white border-0' : ''}
+              >
+                Off
+              </Button>
+            </div>
+            <p className="mt-4 text-sm text-muted-foreground">
+              {recSettings.mode === 'on' && "Recommendations will appear based on your interactions across the app."}
+              {recSettings.mode === 'dashboard_only' && "Recommendations will only appear when you are on the dashboard."}
+              {recSettings.mode === 'off' && "Smart recommendations are disabled."}
+            </p>
           </CardContent>
         </Card>
 

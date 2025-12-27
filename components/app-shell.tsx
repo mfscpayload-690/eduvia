@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { Sidebar } from "@/components/sidebar";
+import { SmartRecommendationPopup } from "@/components/rec-engine/smart-recommendation-popup";
 
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -21,7 +22,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex-1 flex flex-col">
         <Navbar />
         <main className="flex-1 overflow-auto">{children}</main>
-
+        <SmartRecommendationPopup />
       </div>
     </div>
   );
