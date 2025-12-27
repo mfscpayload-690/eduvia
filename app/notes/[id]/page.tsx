@@ -34,7 +34,7 @@ export default function NotePage({ params }: { params: { id: string } }) {
     }
 
     fetchNote();
-  }, [params.id]);
+  }, [params.id, setLastViewedNote]);
 
   // Handle ESC key to exit fullscreen
   useEffect(() => {
