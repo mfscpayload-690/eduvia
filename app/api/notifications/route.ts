@@ -53,3 +53,26 @@ export async function PATCH() {
         );
     }
 }
+
+export async function DELETE() {
+    // Clear ALL notifications for user
+    try {
+        const session = await requireAuth();
+
+        const { error } = await supabaseAdmin
+            .from("notifications")
+            .delete()
+            .eq("user_id", session.user.id);
+
+        if (error) throw error;
+
+        return NextResponse.json({ success: true });
+
+    } catch (error: any) {
+        console.error("DELETE /api/notifications error:", error);
+        return NextResponse.json(
+            { error: "Failed to clear notifications" },
+            { status: 500 }
+        );
+    }
+}

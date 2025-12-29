@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Bell, Check, FileText, Calendar, Clock, Package } from "lucide-react";
+import { Bell, Check, FileText, Calendar, Clock, Package, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -72,14 +72,14 @@ export function NotificationCenter() {
         }
     };
 
-    // Poll for notifications every 60 seconds
+    // Poll for notifications every 10 seconds for faster updates
     useEffect(() => {
         fetchNotifications();
-        const interval = setInterval(fetchNotifications, 60000);
+        const interval = setInterval(fetchNotifications, 10000);
         return () => clearInterval(interval);
     }, []);
 
-    // Refresh when opening
+    // Refresh when opening - only if not already open
     useEffect(() => {
         if (isOpen) fetchNotifications();
     }, [isOpen]);
@@ -110,6 +110,18 @@ export function NotificationCenter() {
             await fetch("/api/notifications", { method: "PATCH" });
         } catch (error) {
             console.error("Failed to mark all read");
+            fetchNotifications(); // Revert/Refresh
+        }
+    };
+
+    const handleClearAll = async () => {
+        // Optimistic update
+        setNotifications([]);
+
+        try {
+            await fetch("/api/notifications", { method: "DELETE" });
+        } catch (error) {
+            console.error("Failed to clear notifications");
             fetchNotifications(); // Revert/Refresh
         }
     };
@@ -154,13 +166,26 @@ export function NotificationCenter() {
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50 backdrop-blur-sm">
                             <h3 className="font-semibold text-sm">Notifications</h3>
-                            {unreadCount > 0 && (
-                                <button
-                                    onClick={handleMarkAllRead}
-                                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
-                                >
-                                    <Check className="h-3 w-3" /> Mark all read
-                                </button>
+                            {notifications.length > 0 && (
+                                <div className="flex items-center gap-2">
+                                    {unreadCount > 0 && (
+                                        <>
+                                            <button
+                                                onClick={handleMarkAllRead}
+                                                className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                                            >
+                                                <Check className="h-3 w-3" /> Mark all read
+                                            </button>
+                                            <span className="text-neutral-300 dark:text-neutral-700">|</span>
+                                        </>
+                                    )}
+                                    <button
+                                        onClick={handleClearAll}
+                                        className="text-xs text-red-600 dark:text-red-400 hover:underline flex items-center gap-1"
+                                    >
+                                        <Trash2 className="h-3 w-3" /> Clear all
+                                    </button>
+                                </div>
                             )}
                         </div>
 

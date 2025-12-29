@@ -87,6 +87,8 @@ export async function notifyTargetAudience(
 
         const { data: users, error: userError } = await query;
 
+        console.log(`DEBUG: notifyTargetAudience found ${users?.length || 0} users for criteria:`, criteria);
+
         if (userError) throw userError;
         if (!users || users.length === 0) return;
 
